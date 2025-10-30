@@ -1,0 +1,162 @@
+{% extends 'portfolio/admin/base_admin.html' %}
+
+{% block page_title %}Messages{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-body">
+        {% if messages %}
+        <form method="post" action="{% url 'portfolio:message_bulk_action' %}">
+            {% csrf_token %}
+            {{ bulk_form.action }}
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" class="form-check-input" id="selectAll">
+                            </th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Subject</th>
+                            <th>Message</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for message in messages %}
+                        <tr {% if not message.read %}class="table-warning"{% endif %}>
+                            <td>
+                                <input type="checkbox" class="form-check-input message-select" 
+                                       name="selected_messages" value="{{ message.pk }}">
+                            </td>
+                            <td>{{ message.name }}</td>
+                            <td>{{ message.email }}</td>
+                            <td>{{ message.subject }}</td>
+                            <td>{{ message.message|truncatewords:10 }}</td>
+                            <td>{{ message.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                {% if message.read %}
+                                <span class="badge bg-success">Read</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">Unread</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'portfolio:message_detail' message.pk %}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'portfolio:message_reply' message.pk %}" 
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-reply"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteModal{{ message.pk }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteModal{{ message.pk }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Delete Message</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete this message from {{ message.name }}?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <a href="{% url 'portfolio:message_delete' message.pk %}" 
+                                                   class="btn btn-danger">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="bulk-actions">
+                    <button type="submit" class="btn btn-primary">Apply to Selected</button>
+                </div>
+                
+                {% if messages.has_other_pages %}
+                <nav aria-label="Message pagination">
+                    <ul class="pagination mb-0">
+                        {% if messages.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ messages.previous_page_number }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in messages.paginator.page_range %}
+                        <li class="page-item {% if messages.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endfor %}
+                        
+                        {% if messages.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ messages.next_page_number }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </form>
+        {% else %}
+        <p class="text-center my-5">No messages received yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% block extra_css %}
+<style>
+.white-space-pre-wrap {
+    white-space: pre-wrap;
+}
+</style>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle "Select All" checkbox
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const messageCheckboxes = document.querySelectorAll('.message-select');
+    
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            messageCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+    }
+    
+    // Update "Select All" state based on individual checkboxes
+    messageCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const allChecked = Array.from(messageCheckboxes).every(cb => cb.checked);
+            const someChecked = Array.from(messageCheckboxes).some(cb => cb.checked);
+            
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

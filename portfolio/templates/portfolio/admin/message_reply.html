@@ -1,0 +1,121 @@
+{% extends 'portfolio/admin/base_admin.html' %}
+
+{% block title %}Reply to Message - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Reply to Message</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="original-message mb-4">
+                        <h6 class="mb-3">Original Message</h6>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="message-meta mb-2">
+                                    <strong>From:</strong> {{ message.name }} &lt;{{ message.email }}&gt;<br>
+                                    <strong>Subject:</strong> {{ message.subject }}<br>
+                                    <strong>Received:</strong> {{ message.created_at|date:"F j, Y, g:i a" }}
+                                </div>
+                                <p class="mb-0 white-space-pre-wrap">{{ message.message }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_subject" class="form-label">Subject</label>
+                            {{ form.subject.errors }}
+                            <input type="text" 
+                                   name="subject" 
+                                   id="id_subject" 
+                                   class="form-control {% if form.subject.errors %}is-invalid{% endif %}"
+                                   value="{{ form.subject.value|default:'' }}" 
+                                   required>
+                            {% if form.subject.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.subject.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_reply" class="form-label">Your Reply</label>
+                            {{ form.reply.errors }}
+                            <textarea name="reply" 
+                                      id="id_reply" 
+                                      rows="6" 
+                                      class="form-control {% if form.reply.errors %}is-invalid{% endif %}" 
+                                      required>{{ form.reply.value|default:'' }}</textarea>
+                            {% if form.reply.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.reply.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'portfolio:message_list' %}" class="btn btn-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Send Reply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+.white-space-pre-wrap {
+    white-space: pre-wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('form.needs-validation');
+    
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .text { font: bold 24px sans-serif; fill: white; }
+        .subtext { font: 14px sans-serif; fill: rgba(255,255,255,0.8); }
+    </style>
+    <text x="10" y="30" class="text">Portfolio</text>
+    <text x="10" y="50" class="subtext">Admin Dashboard</text>
+</svg>

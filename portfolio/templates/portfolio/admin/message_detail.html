@@ -1,0 +1,132 @@
+{% extends 'portfolio/admin/base_admin.html' %}
+
+{% block title %}Message Details - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Message Details</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+                <a href="{% url 'portfolio:message_reply' message.pk %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-reply"></i> Reply
+                </a>
+                <button type="button" 
+                        class="btn btn-sm btn-danger" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteModal">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="original-message">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="message-meta mb-3">
+                                    <strong>From:</strong> {{ message.name }} &lt;{{ message.email }}&gt;<br>
+                                    <strong>Subject:</strong> {{ message.subject }}<br>
+                                    <strong>Received:</strong> {{ message.created_at|date:"F j, Y, g:i a" }}
+                                </div>
+                                <p class="mb-0 white-space-pre-wrap">{{ message.message }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if message.replies.all %}
+                    <div class="replies-section mt-4">
+                        <h6 class="mb-3">Replies</h6>
+                        {% for reply in message.replies.all %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="reply-meta">
+                                        <strong>Reply sent on:</strong> {{ reply.created_at|date:"F j, Y, g:i a" }}
+                                    </div>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteReplyModal{{ reply.pk }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                                <p class="mb-0 white-space-pre-wrap">{{ reply.message }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Delete Reply Modal -->
+                        <div class="modal fade" id="deleteReplyModal{{ reply.pk }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Delete Reply</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete this reply?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <a href="{% url 'portfolio:reply_delete' reply.pk %}" class="btn btn-danger">Delete</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Message Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this message from {{ message.name }}?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="{% url 'portfolio:message_delete' message.pk %}" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+.white-space-pre-wrap {
+    white-space: pre-wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
